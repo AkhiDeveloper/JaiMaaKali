@@ -23,13 +23,18 @@ namespace JaiMaaKali.WinForm.Export
             _excelpack.Dispose();
         }
 
-        public string ExportToFile(IList<TransportClaim> data, string path)
+        public void Export(TransportClaim data, string path, string? filename = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ExportList(IList<TransportClaim> data, string path, string? filename = null)
         {
             //Checking their is data
             if(data.Count() < 1) throw new ArgumentException("No data found for the year and month.");
 
             //Creating File
-            var filename = $"Transport_Claim_{DateTime.Now.ToString("yyyyMMddhhmm")}" + ".xlsx";
+            filename = filename??$"Transport_Claim_{DateTime.Now.ToString("yyyyMMddhhmm")}" + ".xlsx";
             var filepath = Path.Combine(path, filename);
             File.Create(filepath).Close();
 
@@ -88,7 +93,6 @@ namespace JaiMaaKali.WinForm.Export
             _targetsheet.Columns.AutoFit();
             exportexcelpack.Save();
             exportexcelpack.Dispose();
-            return filepath;
         }
     }
 }

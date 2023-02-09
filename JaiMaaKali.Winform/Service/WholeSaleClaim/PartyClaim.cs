@@ -13,8 +13,8 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
         public decimal Discount { get; set; }
         public decimal ClaimAmount 
         { 
-            get=>Amount*(1-Discount); 
-            set=>this.Amount = value/(1-Discount); 
+            get=> decimal.Round(Amount*(Discount),2,MidpointRounding.ToPositiveInfinity); 
+            set=>this.Amount = decimal.Round(value/(Discount),2,MidpointRounding.ToPositiveInfinity); 
         }
     }
 }

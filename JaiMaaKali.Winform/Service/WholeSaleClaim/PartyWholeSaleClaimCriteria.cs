@@ -20,7 +20,7 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
         }
 
         public int SN { get => _sN; }
-        public Customer Party { get; set; }
+        public Customer Party { get; set; } = new Customer();
         public decimal MinClaimAmount { get; set; }
         public decimal MaxClaimAmount { get; set; }
         public decimal AvgClaimAmount { get; set; }

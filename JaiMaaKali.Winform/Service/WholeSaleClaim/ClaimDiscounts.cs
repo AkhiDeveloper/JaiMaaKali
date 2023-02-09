@@ -10,9 +10,9 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
     {
         private IList<Tuple<decimal, decimal>> _discountList;
 
-        public ClaimDiscounts(decimal amount, decimal discount)
+
+        public ClaimDiscounts(decimal amount, decimal discount) : this()
         {
-            _discountList= new List<Tuple<decimal, decimal>>();
             _discountList.Add(Tuple.Create(amount, discount));
         }
 

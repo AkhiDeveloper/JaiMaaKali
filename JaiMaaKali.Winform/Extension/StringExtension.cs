@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace JaiMaaKali.WinForm.Extension
@@ -38,6 +39,11 @@ namespace JaiMaaKali.WinForm.Extension
                 //throw new ArgumentException("No number found in string");
             }
             return result;
+        }
+
+        public static string RemoveExtraSpace(this string input)
+        {
+            return String.Join(" ", input.Split(" ", StringSplitOptions.RemoveEmptyEntries)); 
         }
     }
 

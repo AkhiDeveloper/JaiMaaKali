@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JaiMaaKali.WinForm.Service.DataMining
+namespace JaiMaaKali.WinForm.Data
 {
     public interface IFileStatergy<T>
         where T : class

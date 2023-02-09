@@ -14,12 +14,25 @@ namespace JaiMaaKali.WinForm.Service.Bill
         private decimal _taxRate;
         private decimal _discountRate;
         private IList<BillItem> _billItems;
+        private int _totalItems;
+        
 
-
+        public Bill(Customer party, 
+            decimal taxRate, 
+            decimal discountRate, 
+            DateTime? billDate = null)
+        {
+            _party = party;
+            _taxRate = taxRate;
+            _discountRate = discountRate;
+            _billItems = new List<BillItem>();
+            _totalItems = 0;
+            _billDate = billDate ?? DateTime.Now;
+        }
         public void AddBillItem(BillItem item)
         {
-            var sn = _billItems.Count()+1;
-            item.SN = sn;
+            _totalItems++;
+            item.SN = _totalItems;
             _billItems.Add(item);
         }
 
@@ -31,29 +44,43 @@ namespace JaiMaaKali.WinForm.Service.Bill
             }
         }
 
+        public int TotalItems { get => _totalItems; }
+
+        public int GetQuantityOfBillItem(int item_sn)
+        {
+            return _billItems[item_sn-1].Quantity;
+        }
+
         public void UpdateBillItemAt(int sn, BillItem item)
         {
             if(sn < 0 || sn > _billItems.Count())
                 throw new ArgumentOutOfRangeException("Sn is not in the bill items");
             var existedItem = _billItems.FirstOrDefault(x => x.SN == sn);
-            existedItem.Descripton = item.Descripton;
+            existedItem.Description = item.Description;
             existedItem.Rate = item.Rate;
             existedItem.Quantity = item.Quantity;
         }
 
+        public void ChangeQuantityOfBillItem(int item_sn, int quantity)
+        {
+            var item = _billItems[item_sn - 1];
+            item.Quantity = quantity;
+        }
+
         public void RemoveBillItemAt(int sn)
         {
-            if (sn < 0 || sn > _billItems.Count())
+            if (sn < 0 || sn > _totalItems)
                 throw new ArgumentOutOfRangeException("Sn is not in the bill items");
             _billItems.RemoveAt(sn - 1);
+            _totalItems--;
             foreach(var item in _billItems.Where(x=>x.SN > sn))
             {
                 item.SN--;
             }
         }
 
-        public DateTime BillDate { get=>_billDate; }
-        public Customer Party { get=>_party;}
+        public DateTime BillDate { get => _billDate; }
+        public Customer Party { get => _party; }
         public decimal TaxRate { 
             get=>_taxRate;
             set
@@ -73,49 +100,52 @@ namespace JaiMaaKali.WinForm.Service.Bill
             } 
         }
 
-        public IEnumerable<BillItem> BillItems { get => _billItems; }
+        public IList<BillItem> BillItems { get => _billItems; }
         public decimal GetSubTotal()
         {
-            return _billItems.Sum(x => x.Amount);
+            return decimal.Round(_billItems.Sum(x => x.Amount),2,MidpointRounding.ToPositiveInfinity);
         }
 
         public decimal GetDiscountAmount()
         {
-            return GetSubTotal() * _discountRate;
+            return decimal.Round(GetSubTotal() * _discountRate,2,MidpointRounding.ToPositiveInfinity);
         }
 
         public decimal GetTaxableAmount()
         {
-            return GetSubTotal() - GetDiscountAmount();
+            return decimal.Round(GetSubTotal() - GetDiscountAmount(), 2, MidpointRounding.ToPositiveInfinity);
         }
 
         public decimal GetTaxAmount()
         {
-            return GetTaxableAmount() * _taxRate;
+            return decimal.Round(GetTaxableAmount() * _taxRate, 2, MidpointRounding.ToPositiveInfinity);
         }
 
         public decimal GetTotalAmount()
         {
-            return GetTaxableAmount() + GetTaxAmount();
+            return decimal.Round(GetTaxableAmount() + GetTaxAmount(), 2, MidpointRounding.ToPositiveInfinity);
         }
-
-        public Bill(Customer party)
-        {
-
-            _billItems = new List<BillItem>();
-            _party = party;
-            
-        }
-
-
     }
 
     public class BillItem
     {
         public int SN { get; set; }
-        public string Descripton { get; set; }
-        public int Quantity { get; set; }
+        public string Description { get; set; }
+
+        private int _quantity;
+        public int Quantity { 
+            get=>_quantity; 
+            set 
+            {
+                if(value < 0) 
+                    throw new ArgumentOutOfRangeException
+                        ("Quantity should be in positive");
+
+                _quantity = value;
+            } 
+        }
+
         public decimal Rate { get; set; }
-        public decimal Amount { get => Quantity * Rate; }
+        public decimal Amount { get => decimal.Round(Quantity * Rate, 2, MidpointRounding.ToPositiveInfinity); }
     }
 }

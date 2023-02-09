@@ -9,6 +9,13 @@ namespace JaiMaaKali.WinForm.Export
     public interface IExport<T>
         where T : class
     {
-        string ExportToFile(IList<T> data, string path);
+        void ExportList(IList<T> data, string path, string? filename = null);
+        void Export(T data, string path, string? filename = null);
+    }
+
+    public interface IExport
+    {
+        void ExportList<T>(IList<T> data, string path, string? filename = null);
+        void Export<T>(T data, string path, string? filename = null);
     }
 }

@@ -56,7 +56,7 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
         }
 
         public decimal TotalClaimAmount {
-            get => _partyClaims.Sum(x => x.Value.ClaimAmount);
+            get => decimal.Round(_partyClaims.Sum(x => x.Value.ClaimAmount), 2, MidpointRounding.ToPositiveInfinity);
         }
 
         public IDictionary<int, PartyClaim> GetPartyClaims()

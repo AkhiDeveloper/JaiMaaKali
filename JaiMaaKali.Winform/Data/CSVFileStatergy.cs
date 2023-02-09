@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JaiMaaKali.WinForm.Service.DataMining
+namespace JaiMaaKali.WinForm.Data
 {
     public class CSVFileStatergy<T>
         : IFileStatergy<T> where T : class

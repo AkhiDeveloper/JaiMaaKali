@@ -26,18 +26,27 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
             _knownPartyClaims.Add(claim);
         }
 
+        public void AddKnownPartyClaims(IEnumerable<PartyClaim> claims)
+        {
+            foreach(var claim in claims)
+            {
+                AddKnownPartyClaim(claim);
+            }
+        }
+
         public WholeSaleClaim GenerateClaim(
             int year,
             int month,
-            decimal finalamount, 
+            decimal finalClaimAmount, 
             decimal positive_tolerance = 0.00m, 
             decimal negative_tolerance = 0.00m)
         {
+            var min_discountRate = _claimDiscounts.GetDiscountRate(0);
             var claim = new WholeSaleClaim(year, month);
             claim.AddPartyClaims(_knownPartyClaims);
-            var remainder_amount = finalamount - claim.TotalClaimAmount;
-            var upperlimit = finalamount + positive_tolerance;
-            var lowerlimit = finalamount - negative_tolerance > 0 ? finalamount - negative_tolerance : 0;
+            var remainder_amount = finalClaimAmount - claim.TotalClaimAmount;
+            var upperlimit = finalClaimAmount + positive_tolerance;
+            var lowerlimit = finalClaimAmount - negative_tolerance > 0 ? finalClaimAmount - negative_tolerance : 0;
             var rem_upperlimit = upperlimit - claim.TotalClaimAmount;
             var rem_lowerlimit = lowerlimit - claim.TotalClaimAmount > 0 ? lowerlimit - claim.TotalClaimAmount : 0;
 
@@ -61,7 +70,7 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
                     claim.AddPartyClaims(criteria.Select(x => new PartyClaim()
                     {
                         Party = x.Party,
-                        Discount = _claimDiscounts.GetDiscountRate(x.MaxClaimAmount),
+                        Discount = _claimDiscounts.GetDiscountRate(x.MaxClaimAmount/min_discountRate),
                         ClaimAmount = x.MaxClaimAmount,
                     }));
                     return claim;
@@ -73,12 +82,15 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
             {
                 foreach(var p in criteria)
                 {
-                    if (claim.TotalClaimAmount + p.MinClaimAmount > upperlimit)
-                        break;
+                    if(claim.GetPartyClaims().Count() > 0)
+                    {
+                        if (claim.TotalClaimAmount + p.MinClaimAmount > upperlimit)
+                            break;
+                    } 
                     claim.AddPartyClaim(new PartyClaim()
                     {
                         Party = p.Party,
-                        Discount = _claimDiscounts.GetDiscountRate(p.MinClaimAmount),
+                        Discount = _claimDiscounts.GetDiscountRate(p.MinClaimAmount/min_discountRate),
                         ClaimAmount = p.MinClaimAmount,
                     });
                 }
@@ -89,14 +101,14 @@ namespace JaiMaaKali.WinForm.Service.WholeSaleClaim
             claim.AddPartyClaims(criteria.Select(x => new PartyClaim()
             {
                 Party = x.Party,
-                Discount = _claimDiscounts.GetDiscountRate(x.AvgClaimAmount/totalAvgClaim*remainder_amount),
+                Discount = _claimDiscounts.GetDiscountRate(x.AvgClaimAmount/totalAvgClaim*remainder_amount/min_discountRate),
                 ClaimAmount = x.AvgClaimAmount / totalAvgClaim * remainder_amount,
             }));
             return claim;
 
         }
 
-        public IEnumerable<PartyWholeSaleClaimCriteria> UnknownPartyCriteria()
+        private IEnumerable<PartyWholeSaleClaimCriteria> UnknownPartyCriteria()
         {
             IList<PartyWholeSaleClaimCriteria> result = new List<PartyWholeSaleClaimCriteria>();
             var parties = _criteria.Select(x => x.Party).Except(_knownPartyClaims.Select(x => x.Party));

@@ -1,4 +1,6 @@
 
+using AutoMapper;
+using JaiMaaKali.WinForm.Data;
 using JaiMaaKali.WinForm.Export;
 using JaiMaaKali.WinForm.Service.ClaimGenerator;
 using JaiMaaKali.WinForm.Service.DataMining;
@@ -7,10 +9,12 @@ using System.Windows.Forms;
 
 namespace JaiMaaKali.WinForm
 {
-    public partial class ClaimCreator : Form
+    public partial class TransportClaimControl : UserControl
     {
-        public ClaimCreator()
+        private readonly IMapper _mapper;
+        public TransportClaimControl()
         {
+            
             InitializeComponent();
             YearComboBox.Items.Clear();
             int now_year = DateTime.Now.Year;
@@ -41,8 +45,8 @@ namespace JaiMaaKali.WinForm
                 var claims = claimGenerator.GetTransportClaims(dataminer.Data).Where(x => x.BillDate.Year == year).Where(x => x.BillDate.Month == month).OrderBy(x => x.BillDate).ToList();
 
                 IExport<TransportClaim> exporter = new TransportClaimExcelExport(formatfile);
-                var filename = exporter.ExportToFile(claims, output);
-                MessageBox.Show($"Path: {filename}", "File Successfully Created");
+                exporter.ExportList(claims, output);
+                MessageBox.Show($"File Successfully Created");
             }
             catch(Exception ex)
             {
